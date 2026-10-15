@@ -1,0 +1,12 @@
+# HireAI 🚀
+An AI-powered resume analysis and job matching web application built to streamline applicant screening and skill gap identification.
+
+## Tech Stack
+* **Backend:** Python, FastAPI, Uvicorn, PyPDF
+* **Frontend:** Vanilla HTML, CSS, JavaScript (Responsive UI)
+
+## Features
+* Extracts and reads text directly from uploaded PDF resumes.
+* Compares candidate skills against job descriptions using smart keyword matching.
+* Calculates an instant match score percentage.
+* Highlights matched vs. missing skills and generates tailored interview recommendations.

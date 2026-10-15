@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HireAI | Intelligent Resume Matcher</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --success-bg: #ecfdf5;
+            --success-text: #065f46;
+            --warning-bg: #fffbeb;
+            --warning-text: #92400e;
+        }
+
+        * { box-sizing: border-box; }
+        body { 
+            margin: 0; 
+            font-family: 'Inter', sans-serif; 
+            background: var(--bg-color); 
+            color: var(--text-main); 
+            line-height: 1.5;
+        }
+
+        header { 
+            background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); 
+            color: white; 
+            padding: 3rem 2rem; 
+            text-align: center; 
+        }
+        header h1 { margin: 0; font-size: 2.5rem; font-weight: 700; letter-spacing: -0.025em; }
+        header p { margin: 0.75rem 0 0; color: #c7d2fe; font-size: 1.1rem; }
+
+        main { max-width: 800px; margin: -2rem auto 3rem; padding: 0 1rem; }
+        
+        .panel { 
+            background: var(--card-bg); 
+            padding: 2.5rem; 
+            border-radius: 1rem; 
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05); 
+            margin-bottom: 2rem; 
+            border: 1px solid var(--border);
+        }
+
+        h2 { margin-top: 0; font-size: 1.5rem; color: #0f172a; }
+        h3 { font-size: 1.1rem; color: #334155; margin-bottom: 0.5rem; }
+
+        label { display: block; font-weight: 600; margin: 1.5rem 0 0.5rem; font-size: 0.95rem; }
+        
+        input[type="file"], textarea { 
+            width: 100%; 
+            padding: 0.875rem; 
+            border: 1px solid var(--border); 
+            border-radius: 0.50rem; 
+            font: inherit; 
+            background: #f8fafc;
+            transition: all 0.2s ease;
+        }
+        input[type="file"]:hover, textarea:focus { 
+            border-color: var(--primary); 
+            outline: none; 
+            background: #fff;
+        }
+        textarea { min-height: 160px; resize: vertical; }
+
+        button { 
+            margin-top: 2rem; 
+            padding: 1rem; 
+            border: none; 
+            border-radius: 0.50rem; 
+            background: var(--primary); 
+            color: white; 
+            font-size: 1rem; 
+            font-weight: 600; 
+            cursor: pointer; 
+            width: 100%; 
+            transition: background 0.2s ease;
+        }
+        button:hover { background: var(--primary-hover); }
+        button:disabled { background: #94a3b8; cursor: not-allowed; }
+
+        #message { margin-top: 1rem; padding: 1rem; border-radius: 0.5rem; font-weight: 500; display: none; text-align: center; }
+        
+        .score-box { 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            background: linear-gradient(to right, #f8fafc, #f1f5f9); 
+            padding: 1.5rem; 
+            border-radius: 0.75rem; 
+            border: 1px solid var(--border);
+        }
+        .score-number { font-size: 3rem; font-weight: 800; color: var(--primary); line-height: 1; }
+        
+        .result-section { margin-top: 1.75rem; }
+        .tag { 
+            display: inline-block; 
+            padding: 0.35rem 0.85rem; 
+            margin: 0.25rem; 
+            border-radius: 2rem; 
+            background: var(--success-bg); 
+            color: var(--success-text); 
+            font-size: 0.85rem; 
+            font-weight: 600; 
+        }
+        .tag.missing { background: var(--warning-bg); color: var(--warning-text); }
+
+        ul { margin: 0.5rem 0; padding-left: 1.25rem; color: var(--text-muted); }
+        li { margin-bottom: 0.5rem; font-size: 0.95rem; }
+
+        footer { text-align: center; padding: 1.5rem; color: var(--text-muted); font-size: 0.85rem; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>HireAI</h1>
+        <p>Intelligent Resume Analysis & Job Matching Engine</p>
+    </header>
+
+    <main>
+        <section class="panel">
+            <h2>Upload & Analyze</h2>
+            <p style="color: var(--text-muted); margin-top: 0;">Upload your PDF resume and paste the target job description.</p>
+
+            <label for="resumeFile">PDF Resume</label>
+            <input type="file" id="resumeFile" accept=".pdf,application/pdf">
+
+            <label for="jobDescription">Job Description</label>
+            <textarea id="jobDescription" placeholder="Paste the job requirements here..."></textarea>
+
+            <button type="button" id="analyzeBtn">Analyze Resume</button>
+
+            <div id="message"></div>
+        </section>
+
+        <section class="panel" id="resultsPanel" style="display: none;">
+            <h2>Analysis Breakdown</h2>
+
+            <div class="score-box result-section">
+                <div>
+                    <h3 style="margin:0;">Overall Match Score</h3>
+                    <p style="margin:0.25rem 0 0; font-size:0.85rem; color:var(--text-muted);">Based on keyword alignment & required skills</p>
+                </div>
+                <div class="score-number" id="matchScore">0%</div>
+            </div>
+
+            <div class="result-section">
+                <h3>Matched Skills</h3>
+                <div id="matchedSkills"></div>
+            </div>
+
+            <div class="result-section">
+                <h3>Missing Skills / Gaps</h3>
+                <div id="missingSkills"></div>
+            </div>
+
+            <div class="result-section">
+                <h3>Recommendations</h3>
+                <ul id="recommendationsList"></ul>
+            </div>
+
+            <div class="result-section">
+                <h3>Suggested Interview Questions</h3>
+                <ul id="questionsList"></ul>
+            </div>
+        </section>
+    </main>
+
+    <footer>HireAI • Built for Career Growth</footer>
+
+    <script>
+        const analyzeBtn = document.getElementById("analyzeBtn");
+        const resumeFile = document.getElementById("resumeFile");
+        const jobDescription = document.getElementById("jobDescription");
+        const message = document.getElementById("message");
+        const resultsPanel = document.getElementById("resultsPanel");
+
+        function showMsg(text, isError = false) {
+            message.style.display = "block";
+            message.style.background = isError ? "#ffeeec" : "#fef3c7";
+            message.style.color = isError ? "#991b1b" : "#92400e";
+            message.textContent = text;
+        }
+
+        function renderTags(containerId, items, isMissing = false) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = "";
+            if (!items || items.length === 0) {
+                container.textContent = "None";
+                return;
+            }
+            items.forEach(item => {
+                const tag = document.createElement("span");
+                tag.className = isMissing ? "tag missing" : "tag";
+                tag.textContent = item;
+                container.appendChild(tag);
+            });
+        }
+
+        function renderList(containerId, items) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = "";
+            if (!items || items.length === 0) {
+                container.textContent = "None";
+                return;
+            }
+            items.forEach(item => {
+                const li = document.createElement("li");
+                li.textContent = item;
+                container.appendChild(li);
+            });
+        }
+
+        analyzeBtn.addEventListener("click", async function (e) {
+            e.preventDefault();
+            message.style.display = "none";
+
+            const file = resumeFile.files[0];
+            const desc = jobDescription.value.trim();
+
+            if (!file) {
+                showMsg("Please upload a PDF resume.", true);
+                return;
+            }
+            if (!desc) {
+                showMsg("Please paste a job description.", true);
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("file", file);
+            formData.append("job_description", desc);
+
+            analyzeBtn.disabled = true;
+            analyzeBtn.textContent = "Analyzing Resume...";
+            showMsg("Scanning document and matching keywords...");
+            resultsPanel.style.display = "none";
+
+            try {
+                const response = await fetch("http://127.0.0.1:8000/api/analyze-resume", {
+                    method: "POST",
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.detail || "Server error occurred.");
+                }
+
+                document.getElementById("matchScore").textContent = data.final_match_score + "%";
+                renderTags("matchedSkills", data.matched_skills);
+                renderTags("missingSkills", data.missing_skills, true);
+                renderList("recommendationsList", data.recommendations);
+                renderList("questionsList", data.interview_questions);
+
+                message.style.display = "none";
+                resultsPanel.style.display = "block";
+
+            } catch (err) {
+                showMsg("Error: " + err.message, true);
+            } finally {
+                analyzeBtn.disabled = false;
+                analyzeBtn.textContent = "Analyze Resume";
+            }
+        });
+    </script>
+</body>
+</html>
